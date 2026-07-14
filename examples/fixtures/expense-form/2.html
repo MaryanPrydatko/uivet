@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Submission Form</title>
+    <style>
+        /* Basic reset and box-sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f4f7f6; /* Light background for good contrast */
+            color: #333; /* Dark text for readability */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        main {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2c3e50; /* Darker heading color */
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #333;
+            background-color: #fff;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 8px; /* Adjust padding for file input */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            font-size: 1em;
+            color: #333;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus,
+        input[type="file"]:focus {
+            border-color: #007bff; /* Focus color for interactive elements */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Focus ring */
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 80px;
+        }
+
+        .currency-input {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .currency-input:focus-within {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .currency-input span {
+            padding: 12px 10px;
+            color: #555;
+            background-color: #e9ecef; /* Slightly darker background for currency symbol */
+            border-right: 1px solid #ccc;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            font-size: 1em;
+            line-height: 1; /* Ensure consistent height */
+        }
+
+        .currency-input input[type="number"] {
+            flex-grow: 1;
+            border: none; /* Remove individual border */
+            padding: 12px;
+            border-radius: 0 5px 5px 0; /* Round only right corners */
+            background-color: transparent; /* Make background transparent */
+        }
+
+        .currency-input input[type="number"]:focus {
+            box-shadow: none; /* Remove inner shadow on focus */
+            border-color: transparent; /* Remove inner border on focus */
+        }
+
+        .policy-note {
+            font-size: 0.9em;
+            color: #555; /* Slightly lighter text for policy note */
+            background-color: #e9f7ef; /* Light green background for policy note */
+            border-left: 4px solid #28a745; /* Green border for emphasis */
+            padding: 10px 15px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            line-height: 1.4;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #007bff; /* Primary blue button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
+            background-color: #0056b3; /* Darker blue on hover/focus */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Submit New Expense</h1>
+        <form action="#" method="post">
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <div class="currency-input">
+                    <span>$</span>
+                    <input type="number" id="amount" name="amount" min="0.01" step="0.01" required placeholder="e.g., 123.45">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Meals">Meals</option>
+                    <option value="Software">Software</option>
+                    <option value="Office supplies">Office supplies</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4" placeholder="Briefly describe the expense (e.g., Client lunch, New monitor)" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="receipt">Receipt</label>
+                <input type="file" id="receipt" name="receipt" accept="image/*,.pdf">
+            </div>
+
+            <p class="policy-note">Expenses over $75 require an itemized receipt and are reimbursed within 14 business days.</p>
+
+            <button type="submit">Submit Expense</button>
+        </form>
+    </main>
+</body>
+</html>

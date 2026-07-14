@@ -18,6 +18,7 @@ export interface ModuleGeneratorConfig {
 export type GeneratorConfig = GeminiGeneratorConfig | ModuleGeneratorConfig
 
 export interface JudgeConfig {
+  mode?: "off"
   model?: string
   rubric?: string[]
 }
@@ -80,22 +81,23 @@ export interface RunResult {
   fidelity: FidelityResult
   layout: LayoutResult
   axe: AxeResult
-  judge: JudgeResult
+  judge: JudgeResult | null
 }
 
 export interface GateStatus {
   name: string
   pass: boolean
   detail: string
+  skipped?: boolean
 }
 
 export interface ScenarioAggregate {
   id: string
   prompt: string
-  meanOverall: number
-  minOverall: number
-  maxOverall: number
-  scoreStdDev: number
+  meanOverall: number | null
+  minOverall: number | null
+  maxOverall: number | null
+  scoreStdDev: number | null
   fidelityRate: number
   a11yCriticalSerious: number
   a11yRuleIds: string[]

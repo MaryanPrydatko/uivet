@@ -18,11 +18,17 @@ export function printSummary(results: ScenarioAggregate[], out: string, hasBasel
   const header = cols.map(([name, w]) => pad(name, w)).join("  ")
   const lines: string[] = ["", header, "-".repeat(header.length)]
   for (const r of results) {
+    const mean = r.meanOverall === null ? "-" : String(round(r.meanOverall))
+    const minMax =
+      r.minOverall === null || r.maxOverall === null
+        ? "-"
+        : `${round(r.minOverall)}-${round(r.maxOverall)}`
+    const stddev = r.scoreStdDev === null ? "-" : String(round(r.scoreStdDev))
     const cells = [
       pad(r.id, 20),
-      pad(String(round(r.meanOverall)), 6),
-      pad(`${round(r.minOverall)}-${round(r.maxOverall)}`, 9),
-      pad(String(round(r.scoreStdDev)), 7),
+      pad(mean, 6),
+      pad(minMax, 9),
+      pad(stddev, 7),
       pad(`${Math.round(r.fidelityRate * 100)}%`, 9),
       pad(String(r.a11yCriticalSerious), 9),
       pad(r.pass ? "PASS" : "FAIL", 6),

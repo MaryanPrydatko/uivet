@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Search Results: New York (JFK) to Zürich (ZRH)</title>
+    <style>
+        /* Basic Reset & Body Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6; /* Light background for the page */
+            color: #333; /* Dark grey for main text */
+            line-height: 1.6;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #ffffff; /* White background for the content area */
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        /* Heading for the Route */
+        h1 {
+            font-size: 2em;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        /* Flight List */
+        .flight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between flight cards */
+        }
+
+        /* Individual Flight Card */
+        .flight-card {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .flight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Flight Header (Airline) */
+        .flight-header {
+            flex: 1 1 150px; /* Allow airline to take up space, minimum 150px */
+            margin-right: 20px;
+        }
+
+        .flight-header .airline {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #0056b3; /* A distinct color for the airline name */
+            margin: 0;
+        }
+
+        /* Flight Details (Times, Duration, Stops) */
+        .flight-details {
+            flex: 2 1 350px; /* Allow details to take more space, minimum 350px */
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 30px; /* Gap between time-info and duration-stops, and within them */
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .time-info {
+            display: flex;
+            gap: 25px;
+        }
+
+        .time-info > div {
+            text-align: center;
+        }
+
+        .time-info .time {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: block;
+        }
+
+        .time-info .label {
+            font-size: 0.85em;
+            color: #666;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .duration-stops {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align text to the left */
+            gap: 5px;
+        }
+
+        .duration-stops .duration {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .duration-stops .stops {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* Price and Selection */
+        .flight-price-selection {
+            flex: 0 1 auto; /* Don't grow, shrink if needed, auto width */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Align price and button to the right */
+            gap: 10px;
+            min-width: 120px; /* Ensure enough space for price and button */
+        }
+
+        .flight-price-selection .price {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #007bff; /* Prominent color for price */
+            white-space: nowrap; /* Prevent price from wrapping */
+        }
+
+        .select-button {
+            background-color: #007bff; /* Blue button */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            white-space: nowrap;
+        }
+
+        .select-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            transform: translateY(-1px);
+        }
+
+        .select-button:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+            }
+
+            .flight-card {
+                flex-direction: column; /* Stack items vertically */
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+
+            .flight-header,
+            .flight-details,
+            .flight-price-selection {
+                flex: 1 1 100%; /* Take full width */
+                margin-right: 0;
+                margin-bottom: 15px; /* Add space between stacked sections */
+            }
+
+            .flight-header {
+                margin-bottom: 10px;
+            }
+
+            .flight-details {
+                justify-content: space-between; /* Distribute time and duration/stops */
+                margin-bottom: 15px;
+            }
+
+            .time-info {
+                gap: 15px;
+            }
+
+            .flight-price-selection {
+                flex-direction: row; /* Price and button side-by-side */
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 0; /* No bottom margin if it's the last item */
+            }
+
+            .flight-price-selection .price {
+                font-size: 1.6em;
+            }
+
+            .select-button {
+                padding: 8px 15px;
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .flight-header .airline {
+                font-size: 1.2em;
+            }
+
+            .time-info .time {
+                font-size: 1.2em;
+            }
+
+            .time-info .label {
+                font-size: 0.8em;
+            }
+
+            .duration-stops .duration {
+                font-size: 0.9em;
+            }
+
+            .duration-stops .stops {
+                font-size: 0.8em;
+            }
+
+            .flight-price-selection .price {
+                font-size: 1.4em;
+            }
+
+            .select-button {
+                padding: 7px 12px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New York (JFK) to Zürich (ZRH)</h1>
+        <div class="flight-list">
+            <div class="flight-card">
+                <div class="flight-header">
+                    <h3 class="airline">SWISS</h3>
+                </div>
+                <div class="flight-details">
+                    <div class="time-info">
+                        <div class="departure">
+                            <span class="time">18:40</span>
+                            <span class="label">Departure</span>
+                        </div>
+                        <div class="arrival">
+                            <span class="time">08:25</span>
+                            <span class="label">Arrival</span>
+                        </div>
+                    </div>
+                    <div class="duration-stops">
+                        <span class="duration">7h 45m</span>
+                        <span class="stops">Nonstop</span>
+                    </div>
+                </div>
+                <div class="flight-price-selection">
+                    <div class="price">$1,248</div>
+                    <button class="select-button">Select</button>
+                </div>
+            </div>
+
+            <div class="flight-card">
+                <div class="flight-header">
+                    <h3 class="airline">Lufthansa</h3>
+                </div>
+                <div class="flight-details">
+                    <div class="time-info">
+                        <div class="departure">
+                            <span class="time">16:10</span>
+                            <span class="label">Departure</span>
+                        </div>
+                        <div class="arrival">
+                            <span class="time">09:55</span>
+                            <span class="label">Arrival</span>
+                        </div>
+                    </div>
+                    <div class="duration-stops">
+                        <span class="duration">9h 45m</span>
+                        <span class="stops">1 stop (FRA)</span>
+                    </div>
+                </div>
+                <div class="flight-price-selection">
+                    <div class="price">$1,092</div>
+                    <button class="select-button">Select</button>
+                </div>
+            </div>
+
+            <div class="flight-card">
+                <div class="flight-header">
+                    <h3 class="airline">United</h3>
+                </div>
+                <div class="flight-details">
+                    <div class="time-info">
+                        <div class="departure">
+                            <span class="time">21:30</span>
+                            <span class="label">Departure</span>
+                        </div>
+                        <div class="arrival">
+                            <span class="time">14:20</span>
+                            <span class="label">Arrival</span>
+                        </div>
+                    </div>
+                    <div class="duration-stops">
+                        <span class="duration">10h 50m</span>
+                        <span class="stops">1 stop (EWR)</span>
+                    </div>
+                </div>
+                <div class="flight-price-selection">
+                    <div class="price">$986</div>
+                    <button class="select-button">Select</button>
+                </div>
+            </div>
+
+            <div class="flight-card">
+                <div class="flight-header">
+                    <h3 class="airline">Air France</h3>
+                </div>
+                <div class="flight-details">
+                    <div class="time-info">
+                        <div class="departure">
+                            <span class="time">17:05</span>
+                            <span class="label">Departure</span>
+                        </div>
+                        <div class="arrival">
+                            <span class="time">11:40</span>
+                            <span class="label">Arrival</span>
+                        </div>
+                    </div>
+                    <div class="duration-stops">
+                        <span class="duration">11h 35m</span>
+                        <span class="stops">1 stop (CDG)</span>
+                    </div>
+                </div>
+                <div class="flight-price-selection">
+                    <div class="price">$1,415</div>
+                    <button class="select-button">Select</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

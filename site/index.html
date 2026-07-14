@@ -673,7 +673,7 @@
       <p class="subhead">ChatGPT apps, MCP apps, A2UI: models now render UI at runtime, and every generation is different. uivet samples, renders, checks, and gates them in CI.</p>
 
       <div class="waitlist-wrap" id="join">
-        <form class="waitlist" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <form class="waitlist" action="https://docs.google.com/forms/d/e/1FAIpQLSe41Cq176kQbTdvDujsfojiy1hB7dv_S-7eA-mATChdN2TWqQ/formResponse" method="POST">
           <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <input type="email" name="email" required placeholder="you@company.com" aria-label="Email address" />
           <button class="btn-primary" type="submit">Join the waitlist</button>
@@ -954,7 +954,7 @@ export default config</pre>
     <div class="wrap">
       <h2 class="title">Ship generated UI you can trust.</h2>
       <div class="waitlist-wrap">
-        <form class="waitlist" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <form class="waitlist" action="https://docs.google.com/forms/d/e/1FAIpQLSe41Cq176kQbTdvDujsfojiy1hB7dv_S-7eA-mATChdN2TWqQ/formResponse" method="POST">
           <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <input type="email" name="email" required placeholder="you@company.com" aria-label="Email address" />
           <button class="btn-primary" type="submit">Join the waitlist</button>
@@ -980,17 +980,22 @@ export default config</pre>
 </footer>
 
 <script>
-  // Waitlist: block submit until a Formspree ID is set, otherwise let it POST.
+  // Waitlist: submit directly to the backing form endpoint, stay on the page.
   document.querySelectorAll("form.waitlist").forEach(function (form) {
     form.addEventListener("submit", function (e) {
-      if (form.getAttribute("action").indexOf("YOUR_FORM_ID") !== -1) {
-        e.preventDefault();
-        var note = form.parentNode.querySelector(".form-note");
-        if (note) {
-          note.textContent = "Form endpoint not configured yet: set your Formspree ID in index.html";
-          note.classList.add("note-warn");
-        }
-      }
+      e.preventDefault();
+      var hp = form.querySelector('input[name="_gotcha"]');
+      if (hp && hp.value) return;
+      var email = form.querySelector('input[type="email"]').value.trim();
+      if (!email) return;
+      var body = new FormData();
+      body.append("entry.107718418", email);
+      fetch(form.getAttribute("action"), { method: "POST", mode: "no-cors", body: body });
+      var note = form.parentNode.querySelector(".form-note");
+      if (note) note.textContent = "You're on the list. We'll email you at launch.";
+      var btn = form.querySelector("button");
+      btn.disabled = true;
+      btn.textContent = "Joined";
     });
   });
 

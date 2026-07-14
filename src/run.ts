@@ -13,6 +13,7 @@ import { printSummary } from "./summary.ts"
 import type {
   Baseline,
   GateStatus,
+  JudgeResult,
   RunResult,
   ScenarioAggregate,
   Scenario,
@@ -61,9 +62,14 @@ function resolveGates(config: UivetConfig): Gates {
   }
 }
 
-function emptyRun(index: number, latencyMs: number, error: string, rubric: string[]): RunResult {
+function emptyJudge(error: string, rubric: string[], judgeOff: boolean): JudgeResult | null {
+  if (judgeOff) return null
   const scores: Record<string, number> = {}
   for (const item of rubric) scores[rubricKey(item)] = 1
+  return { scores, overall: 1, rationale: error }
+}
+
+function emptyRun(index: number, latencyMs: number, error: string, judge: JudgeResult | null): RunResult {
   return {
     index,
     html: "",
@@ -75,24 +81,26 @@ function emptyRun(index: number, latencyMs: number, error: string, rubric: strin
     fidelity: { rate: 0, total: 0, found: 0, missing: [] },
     layout: { horizontalOverflow: false, smallTargets: 0, emptyBody: true },
     axe: { critical: 0, serious: 0, ruleIds: [], violations: [] },
-    judge: { scores, overall: 1, rationale: error },
+    judge,
   }
 }
 
 async function executeRun(index: number, scenario: Scenario, ctx: Context): Promise<RunResult> {
   const rubric = ctx.config.judge?.rubric ?? DEFAULT_RUBRIC
+  const judgeOff = ctx.config.judge?.mode === "off"
   const start = performance.now()
   let html: string
   try {
     html = await ctx.generate(scenario)
   } catch (err) {
-    return emptyRun(index, Math.round(performance.now() - start), `generation failed: ${String(err)}`, rubric)
+    const error = `generation failed: ${String(err)}`
+    return emptyRun(index, Math.round(performance.now() - start), error, emptyJudge(error, rubric, judgeOff))
   }
   const latencyMs = Math.round(performance.now() - start)
   try {
     const capture = await renderHtml(ctx.browser, html, ctx.axeSource)
     const fidelity = computeFidelity(scenario.data, capture.text)
-    const judge = await judgeRun(ctx.config.judge, scenario, capture.screenshot)
+    const judge = judgeOff ? null : await judgeRun(ctx.config.judge, scenario, capture.screenshot)
     return {
       index,
       html,
@@ -106,17 +114,30 @@ async function executeRun(index: number, scenario: Scenario, ctx: Context): Prom
       judge,
     }
   } catch (err) {
-    return { ...emptyRun(index, latencyMs, `render failed: ${String(err)}`, rubric), html }
+    const error = `render failed: ${String(err)}`
+    return { ...emptyRun(index, latencyMs, error, emptyJudge(error, rubric, judgeOff)), html }
   }
 }
 
 function gateStatus(agg: Omit<ScenarioAggregate, "gates" | "pass" | "regressions">, gates: Gates, totalCritical: number): GateStatus[] {
+  const judgeGate: GateStatus =
+    agg.meanOverall === null
+      ? { name: "judge score", pass: true, detail: "skipped (judge off)", skipped: true }
+      : {
+          name: "judge score",
+          pass: agg.meanOverall >= gates.minJudgeScore,
+          detail: `mean ${round(agg.meanOverall)} >= ${gates.minJudgeScore}`,
+        }
+  const consistencyGate: GateStatus =
+    agg.scoreStdDev === null
+      ? { name: "consistency", pass: true, detail: "skipped (judge off)", skipped: true }
+      : {
+          name: "consistency",
+          pass: agg.scoreStdDev <= gates.maxScoreStdDev,
+          detail: `stddev ${round(agg.scoreStdDev)} <= ${gates.maxScoreStdDev}`,
+        }
   return [
-    {
-      name: "judge score",
-      pass: agg.meanOverall >= gates.minJudgeScore,
-      detail: `mean ${round(agg.meanOverall)} >= ${gates.minJudgeScore}`,
-    },
+    judgeGate,
     {
       name: "a11y critical",
       pass: totalCritical <= gates.maxA11yCritical,
@@ -127,11 +148,7 @@ function gateStatus(agg: Omit<ScenarioAggregate, "gates" | "pass" | "regressions
       pass: agg.fidelityRate >= gates.minFidelity,
       detail: `${round(agg.fidelityRate)} >= ${gates.minFidelity}`,
     },
-    {
-      name: "consistency",
-      pass: agg.scoreStdDev <= gates.maxScoreStdDev,
-      detail: `stddev ${round(agg.scoreStdDev)} <= ${gates.maxScoreStdDev}`,
-    },
+    consistencyGate,
   ]
 }
 
@@ -139,7 +156,7 @@ function detectRegressions(agg: ScenarioAggregate, baseline: Baseline | undefine
   const prev = baseline?.scenarios[agg.id]
   if (!prev) return []
   const out: string[] = []
-  if (agg.meanOverall < prev.meanOverall - 1.0) {
+  if (agg.meanOverall !== null && agg.meanOverall < prev.meanOverall - 1.0) {
     out.push(`mean score ${round(prev.meanOverall)} -> ${round(agg.meanOverall)}`)
   }
   const newRules = agg.a11yRuleIds.filter((id) => !prev.a11yRuleIds.includes(id))
@@ -154,15 +171,16 @@ async function runScenario(scenario: Scenario, ctx: Context, baseline: Baseline 
   const total = scenario.runs ?? 3
   const indices = Array.from({ length: total }, (_, i) => i)
   const runs = await mapPool(indices, 3, (i) => executeRun(i, scenario, ctx))
-  const overalls = runs.map((r) => r.judge.overall)
+  const judgeOff = ctx.config.judge?.mode === "off"
+  const overalls = runs.map((r) => r.judge?.overall ?? 0)
   const totalCritical = runs.reduce((a, r) => a + r.axe.critical, 0)
   const base = {
     id: scenario.id,
     prompt: scenario.prompt,
-    meanOverall: avg(overalls),
-    minOverall: Math.min(...overalls),
-    maxOverall: Math.max(...overalls),
-    scoreStdDev: stdDev(overalls),
+    meanOverall: judgeOff ? null : avg(overalls),
+    minOverall: judgeOff ? null : Math.min(...overalls),
+    maxOverall: judgeOff ? null : Math.max(...overalls),
+    scoreStdDev: judgeOff ? null : stdDev(overalls),
     fidelityRate: avg(runs.map((r) => r.fidelity.rate)),
     a11yCriticalSerious: runs.reduce((a, r) => a + r.axe.critical + r.axe.serious, 0),
     a11yRuleIds: uniq(runs.flatMap((r) => r.axe.ruleIds)).sort(),
@@ -183,7 +201,7 @@ function toBaseline(scenarios: ScenarioAggregate[]): Baseline {
   const map: Baseline["scenarios"] = {}
   for (const s of scenarios) {
     map[s.id] = {
-      meanOverall: s.meanOverall,
+      meanOverall: s.meanOverall ?? 0,
       fidelityRate: s.fidelityRate,
       a11yRuleIds: s.a11yRuleIds,
     }
@@ -192,8 +210,10 @@ function toBaseline(scenarios: ScenarioAggregate[]): Baseline {
 }
 
 export async function runCommand(options: RunOptions): Promise<number> {
-  apiKey()
   const config = await loadConfig(options.config)
+  const generatorKind = config.generator?.kind ?? "gemini-html"
+  const needsApiKey = generatorKind === "gemini-html" || config.judge?.mode !== "off"
+  if (needsApiKey) apiKey()
   const out = options.out ?? join("results", timestamp())
   const baselinePath = join(dirname(out), "baseline.json")
   let baseline: Baseline | undefined

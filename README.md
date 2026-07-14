@@ -1,21 +1,36 @@
 # uivet
 
-uivet is a test and eval harness for generative UI. It generates an LLM-rendered interface N times per scenario, renders each one in headless Chromium, runs deterministic checks plus an LLM judge, computes how consistent the outputs are, and gates the results against a saved baseline so nondeterministic UI can be tested in CI.
+Test and eval harness for LLM-generated UI: sample each generation N times, render it in headless Chromium, run deterministic checks plus an LLM judge, measure how consistent the outputs are, and gate the result in CI.
 
-## Why
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![CI](https://github.com/MaryanPrydatko/uivet/actions/workflows/ci.yml/badge.svg)](https://github.com/MaryanPrydatko/uivet/actions/workflows/ci.yml)
 
-Teams are starting to ship UI that an LLM produces at request time, and there is no test story for it. Visual regression tools assume the UI comes from deterministic code, so a fresh render that differs on every run defeats them. LLM eval frameworks judge text answers, not the pixels and DOM of a rendered interface. uivet fills that gap: it treats each generation as a sample, measures spread across samples, and checks the rendered result, not just the model output string.
+![uivet report](.github/report.png)
 
-## Quickstart
+## Try it in 30 seconds
+
+No API key needed. This replays recorded generations from `examples/fixtures/` and runs with the judge off, so there are no network calls.
 
 ```bash
+git clone https://github.com/MaryanPrydatko/uivet
+cd uivet
 bun install
 bunx playwright install chromium
+bun run demo:offline
+```
+
+It renders the recorded UIs, runs the accessibility, fidelity, layout, and console-error checks, gates on them, and writes `results/<timestamp>/report.html`. Open that file in a browser.
+
+## Live mode
+
+Live mode generates fresh UIs with Gemini and scores them with the multimodal judge, so it needs an API key.
+
+```bash
 export GOOGLE_GENERATIVE_AI_API_KEY=your_key
 bun run demo
 ```
 
-`bun run demo` runs three example scenarios (flight results, expense form, metrics dashboard) three times each and writes a report you can open in a browser.
+`bun run demo` runs the three example scenarios (flight results, expense form, metrics dashboard) three times each, generates each one, renders it, runs every check plus the judge, and writes a report.
 
 Run your own config:
 
@@ -26,6 +41,15 @@ bun run src/cli.ts run                          # later runs compare to it
 ```
 
 Exit code is 1 if any gate fails or a regression is detected, else 0, so it drops into CI as is.
+
+## Links
+
+- Sample report: https://maryanprydatko.github.io/uivet/demo-report.html
+- Landing page: https://maryanprydatko.github.io/uivet/
+
+## Why
+
+Teams are starting to ship UI that an LLM produces at request time, and there is no test story for it. Visual regression tools assume the UI comes from deterministic code, so a fresh render that differs on every run defeats them. LLM eval frameworks judge text answers, not the pixels and DOM of a rendered interface. uivet fills that gap: it treats each generation as a sample, measures spread across samples, and checks the rendered result, not just the model output string.
 
 ## Config reference
 
@@ -42,7 +66,11 @@ interface UivetConfig {
   generator?:
     | { kind: "gemini-html"; model?: string }   // default, model default gemini-2.5-flash
     | { kind: "module"; path: string }           // module exporting generate(scenario): Promise<string>
-  judge?: { model?: string; rubric?: string[] }  // default rubric: task fit, usability, visual quality
+  judge?: {
+    mode?: "off"          // "off" skips the judge and its gates, runs no judge network calls
+    model?: string
+    rubric?: string[]     // default rubric: task fit, usability, visual quality
+  }
   gates?: {
     minJudgeScore?: number   // default 6   (mean overall, 1-10)
     maxA11yCritical?: number // default 0   (summed critical axe rules across runs)
@@ -52,7 +80,9 @@ interface UivetConfig {
 }
 ```
 
-The `module` generator lets you point uivet at your own generation code (any model, any framework) as long as it returns a full HTML document.
+The `module` generator lets you point uivet at your own generation code (any model, any framework) as long as it returns a full HTML document. `examples/offline-generator.ts` is one such module: it replays the recorded fixtures and powers the offline demo.
+
+With `judge: { mode: "off" }`, uivet skips every judge call, drops the judge-score and consistency gates (shown as skipped in the report and summary), and needs no API key. The fidelity, accessibility, layout, and console checks and their gates still run and still set the exit code.
 
 ## How each check works
 
@@ -61,7 +91,7 @@ The `module` generator lets you point uivet at your own generation code (any mod
 - **Accessibility.** The axe-core source is injected into the page and `axe.run` is executed. Violations are grouped by impact; critical and serious counts feed the a11y gate.
 - **Fidelity.** Every leaf string and number in `scenario.data` is collected recursively and searched for in the page text after whitespace and case normalization. Numbers also match thousands-separated variants. Fidelity is the fraction found; missing values are listed.
 - **Layout.** uivet flags horizontal overflow (`scrollWidth > clientWidth`), counts interactive elements smaller than 24x24, and detects an empty body.
-- **Judge.** The screenshot plus the prompt and data go to Gemini at temperature 0, which returns strict JSON with a 1-10 score per rubric item, an overall score, and a short rationale. One retry on a parse failure.
+- **Judge.** The screenshot plus the prompt and data go to Gemini at temperature 0, which returns strict JSON with a 1-10 score per rubric item, an overall score, and a short rationale. One retry on a parse failure. Skipped entirely when `judge.mode` is `off`.
 - **Aggregate and gate.** Per scenario uivet computes mean/min/max overall, the score standard deviation (consistency), the fidelity rate, and total critical plus serious a11y issues, then evaluates each gate.
 - **Baseline.** `--save-baseline` records per-scenario mean, fidelity, and a11y rule ids. Later runs flag a regression when mean overall drops more than 1.0, the fidelity rate drops, or a new a11y rule id appears.
 
@@ -85,3 +115,7 @@ Each run writes to `results/<timestamp>/`:
 - Runtime sampling and monitoring of production generations, not just offline scenarios.
 - Multi-viewport rendering and responsive checks.
 - Per-team calibrated rubrics and judge ensembles to raise agreement above a single-judge baseline.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

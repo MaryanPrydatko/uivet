@@ -9,7 +9,7 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;")
 }
 
-type Tone = "pass" | "warn" | "fail"
+type Tone = "pass" | "warn" | "fail" | "skip"
 
 function chip(tone: Tone, label: string): string {
   return `<span class="chip ${tone}">${esc(label)}</span>`
@@ -39,15 +39,17 @@ function runCard(run: RunResult): string {
     : ""
   const errs = run.consoleErrors.length ? `<div class="warnrow">console errors: ${run.consoleErrors.length}</div>` : ""
   const err = run.error ? `<div class="warnrow">${esc(run.error)}</div>` : ""
+  const score = run.judge ? `<span class="score">${round(run.judge.overall)}/10</span>` : ""
+  const rationale = run.judge ? `<p class="rationale">${esc(run.judge.rationale)}</p>` : ""
   return `<div class="card">
       ${thumb}
       <div class="cardbody">
-        <div class="cardhead"><span class="num">#${run.index + 1}</span><span class="score">${round(run.judge.overall)}/10</span></div>
+        <div class="cardhead"><span class="num">#${run.index + 1}</span>${score}</div>
         <div class="kv"><span>latency</span><span class="num">${run.latencyMs} ms</span></div>
         <div class="kv"><span>fidelity</span><span class="num">${run.fidelity.found}/${run.fidelity.total}</span></div>
         <div class="kv"><span>a11y c/s</span><span class="num">${run.axe.critical}/${run.axe.serious}</span></div>
         ${errs}${err}
-        <p class="rationale">${esc(run.judge.rationale)}</p>
+        ${rationale}
         ${missing}
       </div>
     </div>`
@@ -56,17 +58,25 @@ function runCard(run: RunResult): string {
 function baselineDeltas(agg: ScenarioAggregate, baseline: Baseline | undefined): string {
   const prev = baseline?.scenarios[agg.id]
   if (!prev) return ""
-  const dMean = round(agg.meanOverall - prev.meanOverall)
   const dFid = round(agg.fidelityRate - prev.fidelityRate)
   const sign = (n: number): string => (n >= 0 ? `+${n}` : `${n}`)
-  return `<div class="deltas">${metric("baseline mean", `${round(prev.meanOverall)} (${sign(dMean)})`)}${metric(
+  const meanCell =
+    agg.meanOverall === null
+      ? metric("baseline mean", `${round(prev.meanOverall)} (-)`)
+      : metric("baseline mean", `${round(prev.meanOverall)} (${sign(round(agg.meanOverall - prev.meanOverall))})`)
+  return `<div class="deltas">${meanCell}${metric(
     "baseline fidelity",
     `${round(prev.fidelityRate)} (${sign(dFid)})`,
   )}</div>`
 }
 
+function gateTone(g: { pass: boolean; skipped?: boolean }): Tone {
+  if (g.skipped) return "skip"
+  return g.pass ? "pass" : "fail"
+}
+
 function scenarioSection(agg: ScenarioAggregate, baseline: Baseline | undefined): string {
-  const gates = agg.gates.map((g) => chip(g.pass ? "pass" : "fail", `${g.name}: ${g.detail}`)).join("")
+  const gates = agg.gates.map((g) => chip(gateTone(g), `${g.name}: ${g.detail}`)).join("")
   const regs = agg.regressions.map((r) => chip("warn", `regression: ${r}`)).join("")
   const violations = unionViolations(agg.runs)
   const vhtml = violations.length
@@ -83,9 +93,14 @@ function scenarioSection(agg: ScenarioAggregate, baseline: Baseline | undefined)
     <p class="prompt">${esc(agg.prompt)}</p>
     <div class="chips">${gates}${regs}</div>
     <div class="metrics">
-      ${metric("mean", String(round(agg.meanOverall)))}
-      ${metric("min-max", `${round(agg.minOverall)}-${round(agg.maxOverall)}`)}
-      ${metric("stddev", String(round(agg.scoreStdDev)))}
+      ${metric("mean", agg.meanOverall === null ? "-" : String(round(agg.meanOverall)))}
+      ${metric(
+        "min-max",
+        agg.minOverall === null || agg.maxOverall === null
+          ? "-"
+          : `${round(agg.minOverall)}-${round(agg.maxOverall)}`,
+      )}
+      ${metric("stddev", agg.scoreStdDev === null ? "-" : String(round(agg.scoreStdDev)))}
       ${metric("fidelity", `${Math.round(agg.fidelityRate * 100)}%`)}
       ${metric("a11y c+s", String(agg.a11yCriticalSerious))}
     </div>
@@ -116,6 +131,7 @@ header .sub{color:var(--muted);font-size:13px}
 .chip.pass{background:var(--passbg);color:var(--pass)}
 .chip.warn{background:var(--warnbg);color:var(--warn)}
 .chip.fail{background:var(--failbg);color:var(--fail)}
+.chip.skip{background:var(--panel);color:var(--muted);border:1px solid var(--line)}
 .metrics,.deltas{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
 .metric{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--bg);min-width:96px}
 .mlabel{display:block;font-size:11px;color:var(--muted)}
