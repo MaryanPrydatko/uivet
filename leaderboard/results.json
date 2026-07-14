@@ -1,6 +1,6 @@
 {
-  "commit": "fa41efb",
-  "generatedAt": "2026-07-14T22:29:17.565Z",
+  "commit": "5c077ed",
+  "generatedAt": "2026-07-14T22:52:13.628Z",
   "models": [
     {
       "label": "Gemini 3.5 Flash",
@@ -244,33 +244,243 @@
     },
     {
       "label": "GPT-5 mini",
-      "meanLatencyMs": null,
+      "meanLatencyMs": 35426,
       "model": "gpt-5-mini",
       "provider": "openai",
-      "reason": "Missing OPENAI_API_KEY environment variable",
-      "scenarios": [],
-      "scenariosPassed": 0,
-      "status": "not-run"
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 2,
+          "consoleErrors": 0,
+          "criticalCount": 1,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 16
+          },
+          "pass": false,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 1
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 1,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 2,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 1,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 9
+          },
+          "pass": true,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 4,
+      "status": "ok"
     },
     {
       "label": "GPT-5",
-      "meanLatencyMs": null,
+      "meanLatencyMs": 53182,
       "model": "gpt-5",
       "provider": "openai",
-      "reason": "Missing OPENAI_API_KEY environment variable",
-      "scenarios": [],
-      "scenariosPassed": 0,
-      "status": "not-run"
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 19
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 1
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 1,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 1
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 5,
+      "status": "ok"
     },
     {
       "label": "GPT-4.1 nano",
-      "meanLatencyMs": null,
+      "meanLatencyMs": 8521,
       "model": "gpt-4.1-nano",
       "provider": "openai",
-      "reason": "Missing OPENAI_API_KEY environment variable",
-      "scenarios": [],
-      "scenariosPassed": 0,
-      "status": "not-run"
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 2,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 1
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 1,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 4,
+          "consoleErrors": 0,
+          "criticalCount": 1,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 18
+          },
+          "pass": false,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 4,
+      "status": "ok"
     }
   ],
   "scenarios": [

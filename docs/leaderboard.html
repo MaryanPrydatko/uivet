@@ -61,7 +61,7 @@
 <header class="wrap">
   <h1>Which LLM writes correct UI?</h1>
   <p class="sub">Each model generates the same 5 interfaces, sampled 3 times each, rendered in headless Chromium, and graded with deterministic checks only: data fidelity, axe-core accessibility, layout, console errors. No LLM judges another LLM. Rerun on every model release.</p>
-  <p class="meta">generated 2026-07-14 &middot; uivet fa41efb &middot; N=3 runs/scenario &middot; temperature 0</p>
+  <p class="meta">generated 2026-07-14 &middot; uivet 5c077ed &middot; N=3 runs/scenario &middot; temperature 0</p>
 </header>
 
 <section class="wrap">
@@ -96,24 +96,34 @@
   <td>17</td>
   <td>23.7s</td>
 </tr>
-<tr class="pending">
-  <td class="rank">-</td>
+<tr>
+  <td class="rank">4</td>
   <td class="model">GPT-5 mini<span class="mid">gpt-5-mini</span></td>
   <td>openai</td>
-  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+  <td class="pass">4/5</td>
+  <td>100%</td>
+  <td>6</td>
+  <td>35.4s</td>
 </tr>
-<tr class="pending">
-  <td class="rank">-</td>
+<tr>
+  <td class="rank">5</td>
   <td class="model">GPT-5<span class="mid">gpt-5</span></td>
   <td>openai</td>
-  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+  <td class="pass">5/5</td>
+  <td>100%</td>
+  <td>1</td>
+  <td>53.2s</td>
 </tr>
-<tr class="pending">
-  <td class="rank">-</td>
+<tr>
+  <td class="rank">6</td>
   <td class="model">GPT-4.1 nano<span class="mid">gpt-4.1-nano</span></td>
   <td>openai</td>
-  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+  <td class="pass">4/5</td>
+  <td>100%</td>
+  <td>10</td>
+  <td>8.5s</td>
 </tr>
+
     </tbody>
   </table></div>
 </section>
@@ -126,6 +136,9 @@
 <tr><td class="model">Gemini 3.5 Flash</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
 <tr><td class="model">Gemini 3.1 Flash-Lite</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
 <tr><td class="model">Gemini 2.5 Flash</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+<tr><td class="model">GPT-5 mini</td><td class="bad">FAIL <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+<tr><td class="model">GPT-5</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+<tr><td class="model">GPT-4.1 nano</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="bad">FAIL <span class="mid">100%</span></td></tr>
     </tbody>
   </table></div>
 </section>
