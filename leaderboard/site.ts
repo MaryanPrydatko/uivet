@@ -1,5 +1,6 @@
 // Generates docs/leaderboard.html from leaderboard/results.json.
 // Rerun after every leaderboard pass: bun leaderboard/site.ts
+import { readFile, writeFile } from "node:fs/promises";
 
 interface ScenarioRow {
   a11yCriticalSerious: number;
@@ -28,18 +29,19 @@ interface Results {
   models: ModelRow[];
 }
 
-const results = (await Bun.file(
-  new URL("results.json", import.meta.url).pathname
-).json()) as Results;
+const results = JSON.parse(
+  await readFile(new URL("results.json", import.meta.url).pathname, "utf8")
+) as Results;
 
 const ran = results.models.filter((m) => m.status === "ok");
 const pending = results.models.filter((m) => m.status !== "ok");
-const scenarioIds = ran[0]?.scenarios?.map((s) => s.id) ?? [];
+const scen = (m: ModelRow | undefined) => m?.scenarios ?? [];
+const scenarioIds = scen(ran.at(0)).map((s) => s.id);
 
 const fmtLatency = (ms?: number) =>
   ms === undefined ? "-" : `${(ms / 1000).toFixed(1)}s`;
 const fidelity = (m: ModelRow) => {
-  const rates = m.scenarios?.map((s) => s.fidelityRate) ?? [];
+  const rates = scen(m).map((s) => s.fidelityRate);
   if (rates.length === 0) {
     return "-";
   }
@@ -192,7 +194,7 @@ ${perScenario}
 </html>
 `;
 
-await Bun.write(
+await writeFile(
   new URL("../docs/leaderboard.html", import.meta.url).pathname,
   html
 );
