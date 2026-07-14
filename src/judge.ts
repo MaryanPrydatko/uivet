@@ -1,4 +1,4 @@
-import { DEFAULT_MODEL, generateContent } from "./gemini.ts";
+import { completeVision, defaultModel, type LlmTarget } from "./llm.ts";
 import type { JudgeConfig, JudgeResult, Scenario } from "./types.ts";
 
 export const DEFAULT_RUBRIC = ["task fit", "usability", "visual quality"];
@@ -81,28 +81,27 @@ function parseJudge(raw: string, rubric: string[]): JudgeResult | null {
   return { overall, rationale, scores };
 }
 
+function judgeTarget(config: JudgeConfig | undefined): LlmTarget {
+  const provider = config?.provider ?? "google";
+  return {
+    baseUrl: config?.baseUrl,
+    model: config?.model ?? defaultModel(provider),
+    provider,
+  };
+}
+
 export async function judgeRun(
   config: JudgeConfig | undefined,
   scenario: Scenario,
   screenshotBase64: string
 ): Promise<JudgeResult> {
-  const model = config?.model ?? DEFAULT_MODEL;
+  const target = judgeTarget(config);
   const rubric = config?.rubric ?? DEFAULT_RUBRIC;
-  const req = {
-    contents: [
-      {
-        parts: [
-          { text: buildPrompt(scenario, rubric) },
-          { inline_data: { data: screenshotBase64, mime_type: "image/png" } },
-        ],
-      },
-    ],
-    generationConfig: { responseMimeType: "application/json", temperature: 0 },
-  };
-  const first = await generateContent(model, req);
+  const prompt = buildPrompt(scenario, rubric);
+  const first = await completeVision(target, prompt, screenshotBase64);
   const parsed =
     parseJudge(first, rubric) ??
-    parseJudge(await generateContent(model, req), rubric);
+    parseJudge(await completeVision(target, prompt, screenshotBase64), rubric);
   if (parsed) {
     return parsed;
   }

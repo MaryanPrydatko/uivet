@@ -91,11 +91,18 @@ function baselineDeltas(
   )}</div>`;
 }
 
-function gateTone(g: { pass: boolean; skipped?: boolean }): Tone {
+function gateTone(g: {
+  advisory?: boolean;
+  pass: boolean;
+  skipped?: boolean;
+}): Tone {
   if (g.skipped) {
     return "skip";
   }
-  return g.pass ? "pass" : "fail";
+  if (g.pass) {
+    return "pass";
+  }
+  return g.advisory ? "warn" : "fail";
 }
 
 function scenarioSection(
@@ -106,7 +113,12 @@ function scenarioSection(
     .map((g) => chip(gateTone(g), `${g.name}: ${g.detail}`))
     .join("");
   const regs = agg.regressions
-    .map((r) => chip("warn", `regression: ${r}`))
+    .map((r) =>
+      chip(
+        r.advisory ? "warn" : "fail",
+        `${r.advisory ? "warn" : "regression"}: ${r.detail}`
+      )
+    )
     .join("");
   const violations = unionViolations(agg.runs);
   const vhtml = violations.length
@@ -193,7 +205,7 @@ export function buildReport(
   createdAt: string
 ): string {
   const passCount = results.filter(
-    (r) => r.pass && r.regressions.length === 0
+    (r) => r.gates.every((g) => g.pass) && r.regressions.length === 0
   ).length;
   const regressed = results.filter((r) => r.regressions.length > 0).length;
   const banner = `${passCount}/${results.length} scenarios clean${

@@ -1,6 +1,11 @@
 import { resolve } from "node:path";
-import { DEFAULT_MODEL, generateContent } from "./gemini.ts";
-import type { Scenario, UivetConfig } from "./types.ts";
+import { completeText, defaultModel, type LlmTarget } from "./llm.ts";
+import type {
+  GeminiGeneratorConfig,
+  LlmGeneratorConfig,
+  Scenario,
+  UivetConfig,
+} from "./types.ts";
 
 export type Generate = (scenario: Scenario) => Promise<string>;
 
@@ -40,14 +45,20 @@ function buildPrompt(scenario: Scenario): string {
 }
 
 async function generateHtml(
-  model: string,
+  target: LlmTarget,
   scenario: Scenario
 ): Promise<string> {
-  const raw = await generateContent(model, {
-    contents: [{ parts: [{ text: buildPrompt(scenario) }] }],
-    generationConfig: { temperature: 0 },
-  });
+  const raw = await completeText(target, buildPrompt(scenario));
   return stripFences(raw);
+}
+
+function generatorTarget(
+  gen: GeminiGeneratorConfig | LlmGeneratorConfig
+): LlmTarget {
+  const provider =
+    gen.kind === "llm-html" ? (gen.provider ?? "google") : "google";
+  const baseUrl = gen.kind === "llm-html" ? gen.baseUrl : undefined;
+  return { baseUrl, model: gen.model ?? defaultModel(provider), provider };
 }
 
 export function makeGenerator(config: UivetConfig): Generate {
@@ -68,6 +79,6 @@ export function makeGenerator(config: UivetConfig): Generate {
       return stripFences(await mod.generate(scenario));
     };
   }
-  const model = gen.model ?? DEFAULT_MODEL;
-  return (scenario) => generateHtml(model, scenario);
+  const target = generatorTarget(gen);
+  return (scenario) => generateHtml(target, scenario);
 }

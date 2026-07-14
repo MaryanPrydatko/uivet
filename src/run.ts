@@ -2,17 +2,18 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { computeFidelity } from "./checks.ts";
-import { apiKey } from "./gemini.ts";
 import type { Generate } from "./generator.ts";
 import { makeGenerator } from "./generator.ts";
 import { DEFAULT_RUBRIC, judgeRun, rubricKey } from "./judge.ts";
+import { type Provider, requireApiKey } from "./llm.ts";
 import { launchBrowser, loadAxeSource, renderHtml } from "./render.ts";
 import { buildReport } from "./report.ts";
-import { printSummary } from "./summary.ts";
+import { hasBlockingFailure, printSummary } from "./summary.ts";
 import type {
   Baseline,
   GateStatus,
   JudgeResult,
+  Regression,
   RunResult,
   Scenario,
   ScenarioAggregate,
@@ -154,8 +155,10 @@ async function executeRun(
 function gateStatus(
   agg: Omit<ScenarioAggregate, "gates" | "pass" | "regressions">,
   gates: Gates,
-  totalCritical: number
+  totalCritical: number,
+  enforce: boolean
 ): GateStatus[] {
+  const advisory = !enforce;
   const judgeGate: GateStatus =
     agg.meanOverall === null
       ? {
@@ -165,6 +168,7 @@ function gateStatus(
           skipped: true,
         }
       : {
+          advisory,
           detail: `mean ${round(agg.meanOverall)} >= ${gates.minJudgeScore}`,
           name: "judge score",
           pass: agg.meanOverall >= gates.minJudgeScore,
@@ -178,6 +182,7 @@ function gateStatus(
           skipped: true,
         }
       : {
+          advisory,
           detail: `stddev ${round(agg.scoreStdDev)} <= ${gates.maxScoreStdDev}`,
           name: "consistency",
           pass: agg.scoreStdDev <= gates.maxScoreStdDev,
@@ -200,28 +205,30 @@ function gateStatus(
 
 function detectRegressions(
   agg: ScenarioAggregate,
-  baseline: Baseline | undefined
-): string[] {
+  baseline: Baseline | undefined,
+  enforce: boolean
+): Regression[] {
   const prev = baseline?.scenarios[agg.id];
   if (!prev) {
     return [];
   }
-  const out: string[] = [];
+  const out: Regression[] = [];
   if (agg.meanOverall !== null && agg.meanOverall < prev.meanOverall - 1.0) {
-    out.push(
-      `mean score ${round(prev.meanOverall)} -> ${round(agg.meanOverall)}`
-    );
+    out.push({
+      advisory: !enforce,
+      detail: `mean score ${round(prev.meanOverall)} -> ${round(agg.meanOverall)}`,
+    });
   }
   const newRules = agg.a11yRuleIds.filter(
     (id) => !prev.a11yRuleIds.includes(id)
   );
   if (newRules.length) {
-    out.push(`new a11y rules: ${newRules.join(", ")}`);
+    out.push({ detail: `new a11y rules: ${newRules.join(", ")}` });
   }
   if (agg.fidelityRate < prev.fidelityRate - 1e-9) {
-    out.push(
-      `fidelity ${round(prev.fidelityRate)} -> ${round(agg.fidelityRate)}`
-    );
+    out.push({
+      detail: `fidelity ${round(prev.fidelityRate)} -> ${round(agg.fidelityRate)}`,
+    });
   }
   return out;
 }
@@ -254,14 +261,17 @@ async function runScenario(
     runs,
     scoreStdDev: judgeOff ? null : stdDev(overalls),
   };
-  const gates = gateStatus(base, ctx.gates, totalCritical);
+  const enforce = Boolean(ctx.config.judge?.enforce);
+  const gates = gateStatus(base, ctx.gates, totalCritical, enforce);
   const agg: ScenarioAggregate = {
     ...base,
     gates,
-    pass: gates.every((g) => g.pass),
+    // Advisory gates (judge score, consistency when enforce is off) warn but
+    // never block, so they do not flip pass.
+    pass: gates.every((g) => g.advisory || g.pass),
     regressions: [],
   };
-  agg.regressions = detectRegressions(agg, baseline);
+  agg.regressions = detectRegressions(agg, baseline, enforce);
   return agg;
 }
 
@@ -277,13 +287,24 @@ function toBaseline(scenarios: ScenarioAggregate[]): Baseline {
   return { createdAt: new Date().toISOString(), scenarios: map };
 }
 
+function providersNeedingKeys(config: UivetConfig): Provider[] {
+  const providers = new Set<Provider>();
+  const gen = config.generator ?? { kind: "gemini-html" };
+  if (gen.kind === "gemini-html") {
+    providers.add("google");
+  } else if (gen.kind === "llm-html") {
+    providers.add(gen.provider ?? "google");
+  }
+  if (config.judge?.mode !== "off") {
+    providers.add(config.judge?.provider ?? "google");
+  }
+  return [...providers];
+}
+
 export async function runCommand(options: RunOptions): Promise<number> {
   const config = await loadConfig(options.config);
-  const generatorKind = config.generator?.kind ?? "gemini-html";
-  const needsApiKey =
-    generatorKind === "gemini-html" || config.judge?.mode !== "off";
-  if (needsApiKey) {
-    apiKey();
+  for (const provider of providersNeedingKeys(config)) {
+    requireApiKey(provider);
   }
   const out = options.out ?? join("results", timestamp());
   const baselinePath = join(dirname(out), "baseline.json");
@@ -333,7 +354,7 @@ export async function runCommand(options: RunOptions): Promise<number> {
     await writeFile(baselinePath, JSON.stringify(toBaseline(results), null, 2));
   }
 
-  const failed = results.some((r) => !r.pass || r.regressions.length > 0);
+  const failed = results.some(hasBlockingFailure);
   printSummary(results, out, Boolean(baseline));
   return failed ? 1 : 0;
 }

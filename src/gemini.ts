@@ -1,6 +1,5 @@
 import { sleep } from "./util.ts";
 
-export const DEFAULT_MODEL = "gemini-2.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
 export interface GeminiPart {
@@ -17,7 +16,7 @@ interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];
 }
 
-export function apiKey(): string {
+export function googleApiKey(): string {
   const key = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (!key) {
     throw new Error(
@@ -32,7 +31,7 @@ export async function generateContent(
   req: GeminiRequest
 ): Promise<string> {
   const url = `${ENDPOINT}/${model}:generateContent`;
-  const key = apiKey();
+  const key = googleApiKey();
   let lastError = "unknown error";
   for (let attempt = 1; attempt <= 3; attempt++) {
     let res: Response;

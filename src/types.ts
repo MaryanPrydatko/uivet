@@ -5,9 +5,18 @@ export interface Scenario {
   runs?: number;
 }
 
+// Deprecated alias for { kind: "llm-html", provider: "google" }. Kept working
+// for back-compat; new configs should use LlmGeneratorConfig.
 export interface GeminiGeneratorConfig {
   kind: "gemini-html";
   model?: string;
+}
+
+export interface LlmGeneratorConfig {
+  baseUrl?: string;
+  kind: "llm-html";
+  model?: string;
+  provider?: "google" | "openai";
 }
 
 export interface ModuleGeneratorConfig {
@@ -15,11 +24,17 @@ export interface ModuleGeneratorConfig {
   path: string;
 }
 
-export type GeneratorConfig = GeminiGeneratorConfig | ModuleGeneratorConfig;
+export type GeneratorConfig =
+  | GeminiGeneratorConfig
+  | LlmGeneratorConfig
+  | ModuleGeneratorConfig;
 
 export interface JudgeConfig {
+  baseUrl?: string;
+  enforce?: boolean;
   mode?: "off";
   model?: string;
+  provider?: "google" | "openai";
   rubric?: string[];
 }
 
@@ -85,10 +100,16 @@ export interface RunResult {
 }
 
 export interface GateStatus {
+  advisory?: boolean;
   detail: string;
   name: string;
   pass: boolean;
   skipped?: boolean;
+}
+
+export interface Regression {
+  advisory?: boolean;
+  detail: string;
 }
 
 export interface ScenarioAggregate {
@@ -102,7 +123,7 @@ export interface ScenarioAggregate {
   minOverall: number | null;
   pass: boolean;
   prompt: string;
-  regressions: string[];
+  regressions: Regression[];
   runs: RunResult[];
   scoreStdDev: number | null;
 }

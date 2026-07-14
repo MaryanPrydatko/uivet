@@ -1,0 +1,32 @@
+<svg
+  aria-label="uivet"
+  role="img"
+  viewBox="0 0 64 64"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <style>
+  .frame {
+    stroke: #0a0f0d;
+  }
+  @media (prefers-color-scheme: dark) {
+    .frame {
+      stroke: #e9f5ef;
+    }
+  }
+  </style>
+  <path d="M8 42V8h36v8" fill="none" stroke="#6ee7b7" stroke-width="6" />
+  <path
+    class="frame"
+    d="M20 20h36v36H20zM20 31h36"
+    fill="none"
+    stroke-linejoin="miter"
+    stroke-width="6"
+  />
+  <path
+    d="m30 43 6 6 11-12"
+    fill="none"
+    stroke="#6ee7b7"
+    stroke-linecap="square"
+    stroke-width="6"
+  />
+</svg>
