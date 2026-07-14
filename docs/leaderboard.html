@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UI generation leaderboard: which LLM writes correct UI?</title>
+<meta name="description" content="uivet runs each model through fixed UI scenarios and grades the rendered output with deterministic checks only. No LLM judges another LLM." />
+<meta property="og:title" content="Which LLM writes correct UI?" />
+<meta property="og:description" content="Deterministic pass rates for LLM-generated interfaces: data fidelity, axe-core accessibility, layout, console errors. Rerun on every model release." />
+<meta property="og:image" content="https://maryanprydatko.github.io/uivet/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
+<style>
+  :root {
+    --ground: #050607; --raised: #0E1012; --hair: #1F2427;
+    --headline: #F5F7F8; --body: #C6CDD4; --muted: #7E8B96;
+    --accent: #3FB6C0; --pass: #3ECF7A; --fail: #F87171;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--ground); color: var(--body); font-family: var(--sans); line-height: 1.55; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+  nav { border-bottom: 1px solid var(--hair); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 58px; }
+  .wordmark { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 15px; color: var(--headline); text-decoration: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 22px; }
+  .nav-links a:hover { color: var(--headline); }
+  header { padding: 56px 0 8px; }
+  h1 { color: var(--headline); font-size: 34px; letter-spacing: -0.02em; text-wrap: balance; }
+  .sub { margin-top: 12px; max-width: 62ch; }
+  .meta { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 14px; }
+  section { padding: 28px 0; }
+  h2 { color: var(--headline); font-size: 18px; margin-bottom: 12px; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--hair); background: var(--raised); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--hair); white-space: nowrap; }
+  th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  .rank { font-family: var(--mono); color: var(--muted); }
+  .model { color: var(--headline); }
+  .mid { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .pass { color: var(--pass); font-family: var(--mono); }
+  .ok { color: var(--pass); font-family: var(--mono); font-size: 13px; }
+  .bad { color: var(--fail); font-family: var(--mono); font-size: 13px; }
+  .pending td { color: var(--muted); }
+  ul { padding-left: 20px; display: grid; gap: 6px; }
+  a { color: var(--accent); }
+  footer { border-top: 1px solid var(--hair); margin-top: 40px; padding: 24px 0 48px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<nav><div class="wrap nav-inner">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 64 64" width="18" height="18" aria-hidden="true"><path d="M8 42V8h36v8" fill="none" stroke="#6ee7b7" stroke-width="6"/><path d="M20 20h36v36H20zM20 31h36" fill="none" stroke="#e9f5ef" stroke-width="6"/><path d="m30 43 6 6 11-12" fill="none" stroke="#6ee7b7" stroke-width="6" stroke-linecap="square"/></svg>uivet</a>
+  <div class="nav-links">
+    <a href="https://github.com/MaryanPrydatko/uivet">GitHub</a>
+    <a href="index.html">Home</a>
+  </div>
+</div></nav>
+
+<header class="wrap">
+  <h1>Which LLM writes correct UI?</h1>
+  <p class="sub">Each model generates the same 5 interfaces, sampled 3 times each, rendered in headless Chromium, and graded with deterministic checks only: data fidelity, axe-core accessibility, layout, console errors. No LLM judges another LLM. Rerun on every model release.</p>
+  <p class="meta">generated 2026-07-14 &middot; uivet fa41efb &middot; N=3 runs/scenario &middot; temperature 0</p>
+</header>
+
+<section class="wrap">
+  <h2>Ranking</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>Model</th><th>Provider</th><th>Passed</th><th>Fidelity</th><th>A11y crit+serious</th><th>Latency</th></tr></thead>
+    <tbody>
+<tr>
+  <td class="rank">1</td>
+  <td class="model">Gemini 3.5 Flash<span class="mid">gemini-3.5-flash</span></td>
+  <td>google</td>
+  <td class="pass">5/5</td>
+  <td>100%</td>
+  <td>3</td>
+  <td>37.0s</td>
+</tr>
+<tr>
+  <td class="rank">2</td>
+  <td class="model">Gemini 3.1 Flash-Lite<span class="mid">gemini-3.1-flash-lite</span></td>
+  <td>google</td>
+  <td class="pass">5/5</td>
+  <td>100%</td>
+  <td>6</td>
+  <td>3.0s</td>
+</tr>
+<tr>
+  <td class="rank">3</td>
+  <td class="model">Gemini 2.5 Flash<span class="mid">gemini-2.5-flash</span></td>
+  <td>google</td>
+  <td class="pass">5/5</td>
+  <td>100%</td>
+  <td>17</td>
+  <td>23.7s</td>
+</tr>
+<tr class="pending">
+  <td class="rank">-</td>
+  <td class="model">GPT-5 mini<span class="mid">gpt-5-mini</span></td>
+  <td>openai</td>
+  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+</tr>
+<tr class="pending">
+  <td class="rank">-</td>
+  <td class="model">GPT-5<span class="mid">gpt-5</span></td>
+  <td>openai</td>
+  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+</tr>
+<tr class="pending">
+  <td class="rank">-</td>
+  <td class="model">GPT-4.1 nano<span class="mid">gpt-4.1-nano</span></td>
+  <td>openai</td>
+  <td colspan="4">pending: Missing OPENAI_API_KEY environment variable</td>
+</tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="wrap">
+  <h2>Per scenario</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Model</th><th>flight-results</th><th>expense-form</th><th>metrics-dashboard</th><th>pricing-table</th><th>settings-form</th></tr></thead>
+    <tbody>
+<tr><td class="model">Gemini 3.5 Flash</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+<tr><td class="model">Gemini 3.1 Flash-Lite</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+<tr><td class="model">Gemini 2.5 Flash</td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td><td class="ok">PASS <span class="mid">100%</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="wrap">
+  <h2>Method</h2>
+  <ul>
+    <li>A scenario passes iff mean fidelity is 100% (every value in the scenario data appears in the rendered page text across all runs) and there are zero axe-core critical violations.</li>
+    <li>Reported, not gated: serious axe violations, layout flags, console errors, mean generation latency.</li>
+    <li>Ranking: scenarios passed, then fidelity, then a11y critical+serious, then latency.</li>
+    <li>Raw per-run data: <a href="https://github.com/MaryanPrydatko/uivet/blob/main/leaderboard/results.json">results.json</a>. Reproduce: <code>bun leaderboard/run.ts</code>.</li>
+  </ul>
+</section>
+
+<footer><div class="wrap">
+  Built with <a href="https://github.com/MaryanPrydatko/uivet">uivet</a>, an MIT-licensed CI test harness for LLM-generated UI. The judge stays off here: only deterministic checks rank models.
+</div></footer>
+</body>
+</html>

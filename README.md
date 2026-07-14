@@ -108,7 +108,7 @@ That writes `baseline.json` next to the output dir (repo root, since `--out ci-r
 
 ## Leaderboard
 
-Which LLM writes correct UI? uivet runs a fixed set of scenarios across models with deterministic checks only (judge off) and publishes pass rates in [leaderboard/LEADERBOARD.md](leaderboard/LEADERBOARD.md). Current top line: all three Gemini Flash models pass 5/5 scenarios at 100% data fidelity; they separate on accessibility (Gemini 3.5 Flash is cleanest at 3 serious axe violations vs 17 for Gemini 2.5 Flash) and speed (3.1 Flash-Lite generates in about 3s vs about 37s for 3.5 Flash). OpenAI models are pending an API key. Reproduce with `bun leaderboard/run.ts`.
+Which LLM writes correct UI? uivet runs a fixed set of scenarios across models with deterministic checks only (judge off) and publishes pass rates: [live page](https://maryanprydatko.github.io/uivet/leaderboard.html), raw data in [leaderboard/LEADERBOARD.md](leaderboard/LEADERBOARD.md). Current top line: all three Gemini Flash models pass 5/5 scenarios at 100% data fidelity; they separate on accessibility (Gemini 3.5 Flash is cleanest at 3 serious axe violations vs 17 for Gemini 2.5 Flash) and speed (3.1 Flash-Lite generates in about 3s vs about 37s for 3.5 Flash). OpenAI models are pending an API key. Reproduce with `bun leaderboard/run.ts`.
 
 ## Why
 
