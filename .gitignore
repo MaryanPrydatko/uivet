@@ -4,3 +4,7 @@ marketing/
 BRIEF.md
 .DS_Store
 *.log
+
+# local secrets
+.env
+.env.*
