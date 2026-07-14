@@ -1,0 +1,303 @@
+{
+  "commit": "fa41efb",
+  "generatedAt": "2026-07-14T22:29:17.565Z",
+  "models": [
+    {
+      "label": "Gemini 3.5 Flash",
+      "meanLatencyMs": 37024,
+      "model": "gemini-3.5-flash",
+      "provider": "google",
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 34
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 1
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 2
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 5,
+      "status": "ok"
+    },
+    {
+      "label": "Gemini 3.1 Flash-Lite",
+      "meanLatencyMs": 2962,
+      "model": "gemini-3.1-flash-lite",
+      "provider": "google",
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 3
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 0,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 6
+          },
+          "pass": true,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 5,
+      "status": "ok"
+    },
+    {
+      "label": "Gemini 2.5 Flash",
+      "meanLatencyMs": 23667,
+      "model": "gemini-2.5-flash",
+      "provider": "google",
+      "scenarios": [
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "flight-results",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "expense-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "metrics-dashboard",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 3,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "pricing-table",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 0
+          },
+          "pass": true,
+          "runs": 3
+        },
+        {
+          "a11yCriticalSerious": 5,
+          "consoleErrors": 0,
+          "criticalCount": 0,
+          "fidelityRate": 1,
+          "id": "settings-form",
+          "layout": {
+            "emptyBody": false,
+            "horizontalOverflow": false,
+            "smallTargets": 3
+          },
+          "pass": true,
+          "runs": 3
+        }
+      ],
+      "scenariosPassed": 5,
+      "status": "ok"
+    },
+    {
+      "label": "GPT-5 mini",
+      "meanLatencyMs": null,
+      "model": "gpt-5-mini",
+      "provider": "openai",
+      "reason": "Missing OPENAI_API_KEY environment variable",
+      "scenarios": [],
+      "scenariosPassed": 0,
+      "status": "not-run"
+    },
+    {
+      "label": "GPT-5",
+      "meanLatencyMs": null,
+      "model": "gpt-5",
+      "provider": "openai",
+      "reason": "Missing OPENAI_API_KEY environment variable",
+      "scenarios": [],
+      "scenariosPassed": 0,
+      "status": "not-run"
+    },
+    {
+      "label": "GPT-4.1 nano",
+      "meanLatencyMs": null,
+      "model": "gpt-4.1-nano",
+      "provider": "openai",
+      "reason": "Missing OPENAI_API_KEY environment variable",
+      "scenarios": [],
+      "scenariosPassed": 0,
+      "status": "not-run"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "flight-results",
+      "prompt": "A flight search results page listing the flights below. Show airline, departure and arrival times, duration, stops, and price for each, with a clear way to compare and select.",
+      "runs": 3
+    },
+    {
+      "id": "expense-form",
+      "prompt": "An expense submission form with amount, date, a category dropdown, a description field, a receipt upload, and a submit button. Render the policy note verbatim near the submit button.",
+      "runs": 3
+    },
+    {
+      "id": "metrics-dashboard",
+      "prompt": "A product metrics dashboard showing the six metrics below as cards, each with its value and week-over-week change. Keep long labels readable without breaking the layout.",
+      "runs": 3
+    },
+    {
+      "id": "pricing-table",
+      "prompt": "A pricing comparison table for the 12 cloud compute instances below. Render every column for all rows (instance name, vCPUs, memory, storage, hourly rate, monthly estimate) in a single readable table, with the caption above it and the note below it. Show every value exactly as given.",
+      "runs": 3
+    },
+    {
+      "id": "settings-form",
+      "prompt": "An account settings form titled 'Account settings'. Include a labeled text input for each field with its helper text, a theme selector offering the three options, a labeled control for the session timeout with its helper text, and a labeled toggle for each item with its helper text, plus a save button. Every control must have a visible, programmatically associated label. Render all labels, options, and helper text exactly as given.",
+      "runs": 3
+    }
+  ]
+}

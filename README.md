@@ -106,6 +106,10 @@ That writes `baseline.json` next to the output dir (repo root, since `--out ci-r
 - Sample report: https://maryanprydatko.github.io/uivet/demo-report.html
 - Landing page: https://maryanprydatko.github.io/uivet/
 
+## Leaderboard
+
+Which LLM writes correct UI? uivet runs a fixed set of scenarios across models with deterministic checks only (judge off) and publishes pass rates in [leaderboard/LEADERBOARD.md](leaderboard/LEADERBOARD.md). Current top line: all three Gemini Flash models pass 5/5 scenarios at 100% data fidelity; they separate on accessibility (Gemini 3.5 Flash is cleanest at 3 serious axe violations vs 17 for Gemini 2.5 Flash) and speed (3.1 Flash-Lite generates in about 3s vs about 37s for 3.5 Flash). OpenAI models are pending an API key. Reproduce with `bun leaderboard/run.ts`.
+
 ## Why
 
 Teams are starting to ship UI that an LLM produces at request time, and there is no test story for it. Visual regression tools assume the UI comes from deterministic code, so a fresh render that differs on every run defeats them. LLM eval frameworks judge text answers, not the pixels and DOM of a rendered interface. uivet fills that gap: it treats each generation as a sample, measures spread across samples, and checks the rendered result, not just the model output string.

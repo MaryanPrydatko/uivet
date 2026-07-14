@@ -14,5 +14,5 @@
     "lib": ["ESNext", "DOM"],
     "types": ["bun"]
   },
-  "include": ["src", "examples"]
+  "include": ["src", "examples", "leaderboard"]
 }
