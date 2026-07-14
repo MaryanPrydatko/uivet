@@ -1,0 +1,15 @@
+{
+  "name": "uivet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Test and eval harness for LLM-generated UI",
+  "scripts": {
+    "run": "bun run src/cli.ts run",
+    "demo": "bun run src/cli.ts run --config examples/uivet.config.ts"
+  },
+  "dependencies": {
+    "axe-core": "^4.10.2",
+    "playwright": "^1.49.1"
+  }
+}
