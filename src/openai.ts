@@ -42,12 +42,46 @@ interface OpenAiResponse {
   choices?: { message?: { content?: string } }[];
 }
 
+// Reasoning models (gpt-5 family) only accept the default temperature.
+function rejectedTemperature(status: number, body: string): boolean {
+  return status === 400 && body.includes('"param": "temperature"');
+}
+
 export function openaiApiKey(): string {
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
     throw new Error("Missing OPENAI_API_KEY environment variable");
   }
   return key;
+}
+
+type Outcome =
+  | { kind: "fatal"; error: string }
+  | { kind: "ok"; text: string }
+  | { kind: "retry"; error: string }
+  | { kind: "strip-temperature" };
+
+async function readResponse(
+  res: Response,
+  canStripTemperature: boolean
+): Promise<Outcome> {
+  if (res.ok) {
+    const json = (await res.json()) as OpenAiResponse;
+    const text = json.choices?.[0]?.message?.content ?? "";
+    if (text.trim()) {
+      return { kind: "ok", text };
+    }
+    return { error: "empty content", kind: "retry" };
+  }
+  const body = (await res.text()).slice(0, 300);
+  if (canStripTemperature && rejectedTemperature(res.status, body)) {
+    return { kind: "strip-temperature" };
+  }
+  const error = `OpenAI HTTP ${res.status}: ${body}`;
+  if (res.status !== 429 && res.status < 500) {
+    return { error, kind: "fatal" };
+  }
+  return { error, kind: "retry" };
 }
 
 export async function chatCompletion(
@@ -57,13 +91,14 @@ export async function chatCompletion(
 ): Promise<string> {
   const url = endpoint(baseUrl);
   const key = openaiApiKey();
-  const payload = requestBody(model, req);
+  let payload = requestBody(model, req);
+  let { temperature } = req;
   let lastError = "unknown error";
   for (let attempt = 1; attempt <= 3; attempt++) {
-    let res: Response;
+    let outcome: Outcome;
     try {
       // biome-ignore lint/performance/noAwaitInLoops: sequential retry with exponential backoff
-      res = await fetch(url, {
+      const res = await fetch(url, {
         body: payload,
         headers: {
           authorization: `Bearer ${key}`,
@@ -71,31 +106,25 @@ export async function chatCompletion(
         },
         method: "POST",
       });
+      outcome = await readResponse(res, temperature !== undefined);
     } catch (err) {
-      lastError = `network error: ${String(err)}`;
-      if (attempt < 3) {
-        await sleep(500 * 2 ** (attempt - 1));
-      }
+      outcome = { error: `network error: ${String(err)}`, kind: "retry" };
+    }
+    if (outcome.kind === "ok") {
+      return outcome.text;
+    }
+    if (outcome.kind === "fatal") {
+      throw new Error(outcome.error);
+    }
+    if (outcome.kind === "strip-temperature") {
+      temperature = undefined;
+      payload = requestBody(model, { ...req, temperature: undefined });
+      process.stderr.write(
+        `note: ${model} rejected temperature ${req.temperature}, retrying with the model default\n`
+      );
       continue;
     }
-    if (res.ok) {
-      const json = (await res.json()) as OpenAiResponse;
-      const text = json.choices?.[0]?.message?.content ?? "";
-      if (text.trim()) {
-        return text;
-      }
-      lastError = "empty content";
-      if (attempt < 3) {
-        await sleep(500 * 2 ** (attempt - 1));
-      }
-      continue;
-    }
-    const errBody = (await res.text()).slice(0, 300);
-    const message = `OpenAI HTTP ${res.status}: ${errBody}`;
-    if (res.status !== 429 && res.status < 500) {
-      throw new Error(message);
-    }
-    lastError = message;
+    lastError = outcome.error;
     if (attempt < 3) {
       await sleep(500 * 2 ** (attempt - 1));
     }
