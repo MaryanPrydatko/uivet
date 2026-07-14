@@ -1,0 +1,14 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "extends": ["ultracite/biome/core"],
+  "files": {
+    "includes": ["**/*.ts", "!examples/fixtures", "!**/*.html"]
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "noIncrementDecrement": "off"
+      }
+    }
+  }
+}

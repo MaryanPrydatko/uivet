@@ -1,46 +1,59 @@
-import { round, uniq } from "./util.ts"
-import type { AxeViolation, Baseline, RunResult, ScenarioAggregate } from "./types.ts"
+import type {
+  AxeViolation,
+  Baseline,
+  RunResult,
+  ScenarioAggregate,
+} from "./types.ts";
+import { round, uniq } from "./util.ts";
 
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
+    .replace(/"/g, "&quot;");
 }
 
-type Tone = "pass" | "warn" | "fail" | "skip"
+type Tone = "pass" | "warn" | "fail" | "skip";
 
 function chip(tone: Tone, label: string): string {
-  return `<span class="chip ${tone}">${esc(label)}</span>`
+  return `<span class="chip ${tone}">${esc(label)}</span>`;
 }
 
 function metric(label: string, value: string): string {
-  return `<div class="metric"><span class="mlabel">${esc(label)}</span><span class="mvalue">${esc(value)}</span></div>`
+  return `<div class="metric"><span class="mlabel">${esc(label)}</span><span class="mvalue">${esc(value)}</span></div>`;
 }
 
 function unionViolations(runs: RunResult[]): AxeViolation[] {
-  const byId = new Map<string, AxeViolation>()
+  const byId = new Map<string, AxeViolation>();
   for (const run of runs) {
     for (const v of run.axe.violations) {
-      const prev = byId.get(v.id)
-      if (!prev || v.nodes > prev.nodes) byId.set(v.id, v)
+      const prev = byId.get(v.id);
+      if (!prev || v.nodes > prev.nodes) {
+        byId.set(v.id, v);
+      }
     }
   }
-  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id))
+  return [...byId.values()].sort((a, b) => a.id.localeCompare(b.id));
 }
 
 function runCard(run: RunResult): string {
   const thumb = run.screenshot
     ? `<img class="shot" alt="run ${run.index + 1} screenshot" src="data:image/png;base64,${run.screenshot}" />`
-    : `<div class="shot empty">no render</div>`
+    : `<div class="shot empty">no render</div>`;
   const missing = run.fidelity.missing.length
     ? `<div class="missing">missing: ${esc(run.fidelity.missing.slice(0, 8).join(", "))}</div>`
-    : ""
-  const errs = run.consoleErrors.length ? `<div class="warnrow">console errors: ${run.consoleErrors.length}</div>` : ""
-  const err = run.error ? `<div class="warnrow">${esc(run.error)}</div>` : ""
-  const score = run.judge ? `<span class="score">${round(run.judge.overall)}/10</span>` : ""
-  const rationale = run.judge ? `<p class="rationale">${esc(run.judge.rationale)}</p>` : ""
+    : "";
+  const errs = run.consoleErrors.length
+    ? `<div class="warnrow">console errors: ${run.consoleErrors.length}</div>`
+    : "";
+  const err = run.error ? `<div class="warnrow">${esc(run.error)}</div>` : "";
+  const score = run.judge
+    ? `<span class="score">${round(run.judge.overall)}/10</span>`
+    : "";
+  const rationale = run.judge
+    ? `<p class="rationale">${esc(run.judge.rationale)}</p>`
+    : "";
   return `<div class="card">
       ${thumb}
       <div class="cardbody">
@@ -52,42 +65,62 @@ function runCard(run: RunResult): string {
         ${rationale}
         ${missing}
       </div>
-    </div>`
+    </div>`;
 }
 
-function baselineDeltas(agg: ScenarioAggregate, baseline: Baseline | undefined): string {
-  const prev = baseline?.scenarios[agg.id]
-  if (!prev) return ""
-  const dFid = round(agg.fidelityRate - prev.fidelityRate)
-  const sign = (n: number): string => (n >= 0 ? `+${n}` : `${n}`)
+function baselineDeltas(
+  agg: ScenarioAggregate,
+  baseline: Baseline | undefined
+): string {
+  const prev = baseline?.scenarios[agg.id];
+  if (!prev) {
+    return "";
+  }
+  const dFid = round(agg.fidelityRate - prev.fidelityRate);
+  const sign = (n: number): string => (n >= 0 ? `+${n}` : `${n}`);
   const meanCell =
     agg.meanOverall === null
       ? metric("baseline mean", `${round(prev.meanOverall)} (-)`)
-      : metric("baseline mean", `${round(prev.meanOverall)} (${sign(round(agg.meanOverall - prev.meanOverall))})`)
+      : metric(
+          "baseline mean",
+          `${round(prev.meanOverall)} (${sign(round(agg.meanOverall - prev.meanOverall))})`
+        );
   return `<div class="deltas">${meanCell}${metric(
     "baseline fidelity",
-    `${round(prev.fidelityRate)} (${sign(dFid)})`,
-  )}</div>`
+    `${round(prev.fidelityRate)} (${sign(dFid)})`
+  )}</div>`;
 }
 
 function gateTone(g: { pass: boolean; skipped?: boolean }): Tone {
-  if (g.skipped) return "skip"
-  return g.pass ? "pass" : "fail"
+  if (g.skipped) {
+    return "skip";
+  }
+  return g.pass ? "pass" : "fail";
 }
 
-function scenarioSection(agg: ScenarioAggregate, baseline: Baseline | undefined): string {
-  const gates = agg.gates.map((g) => chip(gateTone(g), `${g.name}: ${g.detail}`)).join("")
-  const regs = agg.regressions.map((r) => chip("warn", `regression: ${r}`)).join("")
-  const violations = unionViolations(agg.runs)
+function scenarioSection(
+  agg: ScenarioAggregate,
+  baseline: Baseline | undefined
+): string {
+  const gates = agg.gates
+    .map((g) => chip(gateTone(g), `${g.name}: ${g.detail}`))
+    .join("");
+  const regs = agg.regressions
+    .map((r) => chip("warn", `regression: ${r}`))
+    .join("");
+  const violations = unionViolations(agg.runs);
   const vhtml = violations.length
     ? `<ul class="axe">${violations
-        .map((v) => `<li><span class="chip ${v.impact === "critical" ? "fail" : "warn"}">${esc(v.impact)}</span> <span class="num">${esc(v.id)}</span> ${esc(v.description)} (${v.nodes})</li>`)
+        .map(
+          (v) =>
+            `<li><span class="chip ${v.impact === "critical" ? "fail" : "warn"}">${esc(v.impact)}</span> <span class="num">${esc(v.id)}</span> ${esc(v.description)} (${v.nodes})</li>`
+        )
         .join("")}</ul>`
-    : `<p class="ok">no axe violations</p>`
-  const missing = uniq(agg.runs.flatMap((r) => r.fidelity.missing))
+    : `<p class="ok">no axe violations</p>`;
+  const missing = uniq(agg.runs.flatMap((r) => r.fidelity.missing));
   const missHtml = missing.length
     ? `<div class="missblock"><strong>missing values across runs:</strong> ${esc(missing.join(", "))}</div>`
-    : ""
+    : "";
   return `<section class="scenario">
     <h2>${esc(agg.id)} <span class="status ${agg.pass ? "pass" : "fail"}">${agg.pass ? "PASS" : "FAIL"}</span></h2>
     <p class="prompt">${esc(agg.prompt)}</p>
@@ -98,7 +131,7 @@ function scenarioSection(agg: ScenarioAggregate, baseline: Baseline | undefined)
         "min-max",
         agg.minOverall === null || agg.maxOverall === null
           ? "-"
-          : `${round(agg.minOverall)}-${round(agg.maxOverall)}`,
+          : `${round(agg.minOverall)}-${round(agg.maxOverall)}`
       )}
       ${metric("stddev", agg.scoreStdDev === null ? "-" : String(round(agg.scoreStdDev)))}
       ${metric("fidelity", `${Math.round(agg.fidelityRate * 100)}%`)}
@@ -108,7 +141,7 @@ function scenarioSection(agg: ScenarioAggregate, baseline: Baseline | undefined)
     <div class="cards">${agg.runs.map(runCard).join("")}</div>
     <details open><summary>axe violations</summary>${vhtml}</details>
     ${missHtml}
-  </section>`
+  </section>`;
 }
 
 const STYLE = `:root{--bg:#ffffff;--panel:#f6f7f9;--fg:#1a1d21;--muted:#5c636e;--line:#e3e6ea;--pass:#137a3f;--passbg:#e4f4ea;--warn:#8a5a00;--warnbg:#fdf1d6;--fail:#b0242a;--failbg:#fbe6e6}
@@ -152,15 +185,21 @@ summary{cursor:pointer;font-size:13px;font-weight:600}
 .axe{margin:8px 0;padding-left:18px;font-size:12px}
 .axe li{margin:4px 0}
 .ok{color:var(--pass);font-size:13px}
-.missblock{font-size:12px;margin-top:10px;color:var(--fail)}`
+.missblock{font-size:12px;margin-top:10px;color:var(--fail)}`;
 
-export function buildReport(results: ScenarioAggregate[], baseline: Baseline | undefined, createdAt: string): string {
-  const passCount = results.filter((r) => r.pass && r.regressions.length === 0).length
-  const regressed = results.filter((r) => r.regressions.length > 0).length
+export function buildReport(
+  results: ScenarioAggregate[],
+  baseline: Baseline | undefined,
+  createdAt: string
+): string {
+  const passCount = results.filter(
+    (r) => r.pass && r.regressions.length === 0
+  ).length;
+  const regressed = results.filter((r) => r.regressions.length > 0).length;
   const banner = `${passCount}/${results.length} scenarios clean${
     baseline ? ` (baseline compared, ${regressed} with regressions)` : ""
-  }`
-  const sections = results.map((r) => scenarioSection(r, baseline)).join("")
+  }`;
+  const sections = results.map((r) => scenarioSection(r, baseline)).join("");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -179,5 +218,5 @@ export function buildReport(results: ScenarioAggregate[], baseline: Baseline | u
 ${sections}
 </div>
 </body>
-</html>`
+</html>`;
 }

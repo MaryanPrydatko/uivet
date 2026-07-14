@@ -1,119 +1,119 @@
 export interface Scenario {
-  id: string
-  prompt: string
-  data?: unknown
-  runs?: number
+  data?: unknown;
+  id: string;
+  prompt: string;
+  runs?: number;
 }
 
 export interface GeminiGeneratorConfig {
-  kind: "gemini-html"
-  model?: string
+  kind: "gemini-html";
+  model?: string;
 }
 
 export interface ModuleGeneratorConfig {
-  kind: "module"
-  path: string
+  kind: "module";
+  path: string;
 }
 
-export type GeneratorConfig = GeminiGeneratorConfig | ModuleGeneratorConfig
+export type GeneratorConfig = GeminiGeneratorConfig | ModuleGeneratorConfig;
 
 export interface JudgeConfig {
-  mode?: "off"
-  model?: string
-  rubric?: string[]
+  mode?: "off";
+  model?: string;
+  rubric?: string[];
 }
 
 export interface GatesConfig {
-  minJudgeScore?: number
-  maxA11yCritical?: number
-  minFidelity?: number
-  maxScoreStdDev?: number
+  maxA11yCritical?: number;
+  maxScoreStdDev?: number;
+  minFidelity?: number;
+  minJudgeScore?: number;
 }
 
 export interface UivetConfig {
-  scenarios: Scenario[]
-  generator?: GeneratorConfig
-  judge?: JudgeConfig
-  gates?: GatesConfig
+  gates?: GatesConfig;
+  generator?: GeneratorConfig;
+  judge?: JudgeConfig;
+  scenarios: Scenario[];
 }
 
 export interface FidelityResult {
-  rate: number
-  total: number
-  found: number
-  missing: string[]
+  found: number;
+  missing: string[];
+  rate: number;
+  total: number;
 }
 
 export interface LayoutResult {
-  horizontalOverflow: boolean
-  smallTargets: number
-  emptyBody: boolean
+  emptyBody: boolean;
+  horizontalOverflow: boolean;
+  smallTargets: number;
 }
 
 export interface AxeViolation {
-  id: string
-  impact: string
-  description: string
-  nodes: number
+  description: string;
+  id: string;
+  impact: string;
+  nodes: number;
 }
 
 export interface AxeResult {
-  critical: number
-  serious: number
-  ruleIds: string[]
-  violations: AxeViolation[]
+  critical: number;
+  ruleIds: string[];
+  serious: number;
+  violations: AxeViolation[];
 }
 
 export interface JudgeResult {
-  scores: Record<string, number>
-  overall: number
-  rationale: string
+  overall: number;
+  rationale: string;
+  scores: Record<string, number>;
 }
 
 export interface RunResult {
-  index: number
-  html: string
-  screenshot: string
-  text: string
-  consoleErrors: string[]
-  latencyMs: number
-  error?: string
-  fidelity: FidelityResult
-  layout: LayoutResult
-  axe: AxeResult
-  judge: JudgeResult | null
+  axe: AxeResult;
+  consoleErrors: string[];
+  error?: string;
+  fidelity: FidelityResult;
+  html: string;
+  index: number;
+  judge: JudgeResult | null;
+  latencyMs: number;
+  layout: LayoutResult;
+  screenshot: string;
+  text: string;
 }
 
 export interface GateStatus {
-  name: string
-  pass: boolean
-  detail: string
-  skipped?: boolean
+  detail: string;
+  name: string;
+  pass: boolean;
+  skipped?: boolean;
 }
 
 export interface ScenarioAggregate {
-  id: string
-  prompt: string
-  meanOverall: number | null
-  minOverall: number | null
-  maxOverall: number | null
-  scoreStdDev: number | null
-  fidelityRate: number
-  a11yCriticalSerious: number
-  a11yRuleIds: string[]
-  gates: GateStatus[]
-  pass: boolean
-  regressions: string[]
-  runs: RunResult[]
+  a11yCriticalSerious: number;
+  a11yRuleIds: string[];
+  fidelityRate: number;
+  gates: GateStatus[];
+  id: string;
+  maxOverall: number | null;
+  meanOverall: number | null;
+  minOverall: number | null;
+  pass: boolean;
+  prompt: string;
+  regressions: string[];
+  runs: RunResult[];
+  scoreStdDev: number | null;
 }
 
 export interface BaselineEntry {
-  meanOverall: number
-  fidelityRate: number
-  a11yRuleIds: string[]
+  a11yRuleIds: string[];
+  fidelityRate: number;
+  meanOverall: number;
 }
 
 export interface Baseline {
-  createdAt: string
-  scenarios: Record<string, BaselineEntry>
+  createdAt: string;
+  scenarios: Record<string, BaselineEntry>;
 }
